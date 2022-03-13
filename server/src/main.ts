@@ -1,31 +1,42 @@
 import Express from "express";
 import cors from "cors";
 import mysql from "mysql2";
-// const app = Express();
-// const port = 4000
+import * as bodyParser from "body-parser";
 
-// app.use(cors({
-//     origin: 'http://localhost:3000',
-//     credentials: true,
-//     optionsSuccessStatus: 200,
-// }))
-
-// app.get('/', (req, res) => {
-//   res.send('Hello World!');
-// })
-
-// app.listen(port, () => {
-//   console.log(`Example app listening on port ${port}`);
-// })
-
-import { init, appendMemo, getAllMemo } from "./dbHelper";
+import { init, appendMemo, getAllMemo, deleteAllMemo } from "./dbHelper";
+import { Memo } from "./types/memoType";
 
 init();
+const app = Express();
+const port = 4000
 
-appendMemo({
-    title: "TEST",
-    id: 1,
-    enabled: true,
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    optionsSuccessStatus: 200,
+}));
+app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({
+//     extended: true,
+// }));
+
+app.get('/memo/all', async (req, res) => {
+    const allMemo = await getAllMemo();
+    res.json(allMemo);
+})
+
+app.delete('/memo/delete/all', async (req, res) => {
+    await deleteAllMemo();
+    res.send('successfully deleted all memos.\n');
+})
+
+app.post('/memo/append', async (req, res) => {
+    console.log(req.body);
+    const data = req.body as Memo;
+    await appendMemo(data);
+    res.send("success!");
 });
 
-getAllMemo()
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+})

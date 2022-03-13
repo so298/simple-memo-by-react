@@ -1,49 +1,64 @@
-import * as mysql from "mysql2";
+import * as mysql from "mysql2/promise";
 import { Memo } from "./types/memoType";
 
-const conn = mysql.createConnection({
+
+const connectionConfig: mysql.ConnectionOptions = {
     host: "mysql",
     user: "root",
     password: "secret",
     database: "memo_app",
-})
+}
 
-conn.connect((err) => {
-    if (err != null) {
-        console.error("Database connection failed.");
-    } else {
-        console.log("Connected database successfully")
+
+export async function init(): Promise<void> {
+    const conn = await mysql.createConnection(connectionConfig);
+    // conn.connect();
+    try {
+        conn.query(
+            "CREATE TABLE IF NOT EXISTS memos (id int, title varchar(255), enabled boolean);",
+        )
+    } catch (err) {
+        console.error(err);
+    } finally {
+        conn.end();
     }
-})
-
-export function init(): void {
-    conn.query(
-        "CREATE TABLE IF NOT EXISTS memos (id int, title varchar(255), enabled boolean);",
-        (err) => {
-            if (err != null) {
-                console.error(err);
-            }
-        }
-    )
 }
 
-export function appendMemo(newMemo: Memo): void {
-    conn.query(
-        "INSERT into memos SET ?", newMemo,
-        (err) => {
-            if (err != null) {
-                console.error(err);
-            }
-        }
-    )
+export async function appendMemo(newMemo: Memo): Promise<void> {
+    const conn = await mysql.createConnection(connectionConfig);
+    try {
+        conn.query(
+            "INSERT into memos SET ?", newMemo,
+        )
+    } catch (err) {
+        console.error(err);
+    } finally {
+        conn.end();
+    }
 }
 
-export function getAllMemo(): Memo[] {
-    conn.query("SELECT * from memos", (err, rows, fields) => {
-        if (err != null) {
-            console.error(err);
-        }
-        console.log(rows);
-    })
-    return []
+export async function getAllMemo(): Promise<Memo[]> {
+    let ret: Memo[] = [];
+    const conn = await mysql.createConnection(connectionConfig);
+    try {
+        const [rows, fields] = await conn.query("SELECT * from memos");
+        ret = rows as Memo[];
+    } catch (err) {
+        console.error(err);
+    } finally {
+        conn.end();
+    }
+
+    return ret;
+}
+
+export async function deleteAllMemo(): Promise<void> {
+    const conn = await mysql.createConnection(connectionConfig);
+    try {
+        await conn.query("DELETE FROM memos;");
+    } catch (err) {
+        console.error(err);
+    } finally {
+        conn.end();
+    }
 }
