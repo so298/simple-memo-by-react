@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+  server:
+    image: node:17-alpine
+    working_dir: /app
+    volumes:
+      - ./server:/app
+    depends_on:
+      - mysql
+    command: sh -c "yarn install && sh ./wait-for mysql:3306 -- npx ts-node src/main.ts"
+    ports:
+      - 4000:4000
+
+  mysql:
+    image: mysql:oracle
+    working_dir: /
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: memo_app
