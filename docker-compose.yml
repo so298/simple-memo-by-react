@@ -18,3 +18,12 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: memo_app
+
+  frontend:
+    image: node:17-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -c "yarn install && yarn run start"
+    ports:
+      - 3000:3000

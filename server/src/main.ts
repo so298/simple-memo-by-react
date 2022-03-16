@@ -3,7 +3,7 @@ import cors from "cors";
 import mysql from "mysql2";
 import * as bodyParser from "body-parser";
 
-import { init, appendMemo, getAllMemo, deleteAllMemo } from "./dbHelper";
+import { init, appendMemo, getAllMemo, deleteAllMemo, deleteMemoById } from "./dbHelper";
 import { Memo } from "./types/memoType";
 
 init();
@@ -25,9 +25,14 @@ app.get('/memo/all', async (req, res) => {
     res.json(allMemo);
 })
 
-app.delete('/memo/delete/all', async (req, res) => {
+app.delete('/memo/delete_all', async (req, res) => {
     await deleteAllMemo();
     res.send('successfully deleted all memos.\n');
+})
+
+app.delete('/memo/delete/:id', async (req, res) => {
+    await deleteMemoById(parseInt(req.params.id));
+    res.send('successfully deleted');
 })
 
 app.post('/memo/append', async (req, res) => {

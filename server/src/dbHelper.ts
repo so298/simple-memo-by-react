@@ -52,6 +52,17 @@ export async function getAllMemo(): Promise<Memo[]> {
     return ret;
 }
 
+export async function deleteMemoById(id: number) {
+    const conn = await mysql.createConnection(connectionConfig);
+    try {
+        await conn.query("UPDATE memos SET enabled = 0 WHERE id = ?", [id]);
+    } catch (err) {
+        console.log(err);
+    } finally {
+        conn.end();
+    }
+}
+
 export async function deleteAllMemo(): Promise<void> {
     const conn = await mysql.createConnection(connectionConfig);
     try {
